@@ -27,6 +27,8 @@ class Sheet
     /** @var SheetManager Sheet manager */
     private $sheetManager;
 
+    private $mergeRanges;
+
     /**
      * @param int $sheetIndex Index of the sheet, based on order in the workbook (zero-based)
      * @param string $associatedWorkbookId ID of the sheet's associated workbook
@@ -88,6 +90,14 @@ class Sheet
         $this->sheetManager->markSheetNameAsUsed($this);
 
         return $this;
+    }
+
+    public function getMergeRanges() {
+        return $this->mergeRanges;
+    }
+
+    public function setMergeRanges($ranges) {
+        $this->mergeRanges = $ranges;
     }
 
     /**
