@@ -27,7 +27,8 @@ class Sheet
     /** @var SheetManager Sheet manager */
     private $sheetManager;
 
-    private $mergeRanges;
+    /** @var bool Sheet is started */
+    private $isSheetStarted = false;
 
     /**
      * @param int $sheetIndex Index of the sheet, based on order in the workbook (zero-based)
@@ -92,12 +93,23 @@ class Sheet
         return $this;
     }
 
-    public function getMergeRanges() {
-        return $this->mergeRanges;
+    /**
+     * @return bool isSheetStarted Sheet was started
+     */
+    public function isSheetStarted()
+    {
+        return $this->isSheetStarted;
     }
 
-    public function setMergeRanges($ranges) {
-        $this->mergeRanges = $ranges;
+    /**
+     * @param bool $isSheetStarted Set if sheet was started
+     * @return Sheet
+     */
+    public function setIsSheetStarted($isSheetStarted)
+    {
+        $this->isSheetStarted = $isSheetStarted;
+
+        return $this;
     }
 
     /**
