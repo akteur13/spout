@@ -62,6 +62,9 @@ EOD;
     /** @var InternalEntityFactory Factory to create entities */
     private $entityFactory;
 
+    /** @var OptionsManagerInterface */
+    private $optionsManager;
+
     /**
      * WorksheetManager constructor.
      *
@@ -84,6 +87,7 @@ EOD;
         StringHelper $stringHelper,
         InternalEntityFactory $entityFactory
     ) {
+        $this->optionsManager = $optionsManager;
         $this->shouldUseInlineStrings = $optionsManager->getOption(Options::SHOULD_USE_INLINE_STRINGS);
         $this->rowManager = $rowManager;
         $this->styleManager = $styleManager;
@@ -113,7 +117,7 @@ EOD;
         $worksheet->setFilePointer($sheetFilePointer);
 
         \fwrite($sheetFilePointer, self::SHEET_XML_FILE_HEADER);
-        \fwrite($sheetFilePointer, '<sheetData>');
+        // \fwrite($sheetFilePointer, '<sheetData>');
     }
 
     /**
@@ -153,6 +157,22 @@ EOD;
      */
     private function addNonEmptyRow(Worksheet $worksheet, Row $row)
     {
+        if (!$worksheet->getExternalSheet()->isSheetStarted()) {
+            // create nodes for columns widths
+            if ($this->optionsManager->getOption(Options::COLUMN_WIDTHS)) {
+                $colsString = '<cols>';
+                foreach ($this->optionsManager->getOption(Options::COLUMN_WIDTHS) as $index => $width) {
+                    $index++;
+                    $colsString.= '<col collapsed="false" customWidth="true" hidden="false" outlineLevel="0" style="0" max="'.$index.'" min="'.$index.'"  width="'.$width.'"/>';
+                }
+                $colsString.="</cols>";
+                \fwrite($worksheet->getFilePointer(), $colsString);
+            }
+
+            \fwrite($worksheet->getFilePointer(), '<sheetData>');
+            $worksheet->getExternalSheet()->setIsSheetStarted(true);
+        }
+
         $rowStyle = $row->getStyle();
         $rowIndexOneBased = $worksheet->getLastWrittenRowIndex() + 1;
         $numCells = $row->getNumCells();
@@ -270,19 +290,23 @@ EOD;
             return;
         }
 
+        if (!$worksheet->getExternalSheet()->isSheetStarted()) {
+            \fwrite($worksheetFilePointer, '<sheetData>');
+            $worksheet->getExternalSheet()->setIsSheetStarted(true);
+        }
+
         \fwrite($worksheetFilePointer, '</sheetData>');
 
-        $mergeRanges = $worksheet->getExternalSheet()->getMergeRanges();
-        if(!empty($mergeRanges)) {
-            $startLine = '<mergeCells count="1">';
-            $rangeLine = '';
-            foreach ($mergeRanges as $key => $range) {
-                $rangeLine .= '<mergeCell ref="' . $range . '"/>';
+        // create nodes for merge cells
+        if ($this->optionsManager->getOption(Options::MERGE_CELLS)) {
+            $mergeCellString = '<mergeCells count="'.count($this->optionsManager->getOption(Options::MERGE_CELLS)).'">';
+            foreach ($this->optionsManager->getOption(Options::MERGE_CELLS) as $value) {
+                $mergeCellString.= '<mergeCell ref="'.$value.'"/>';
             }
-            $endLine = '</mergeCells>';
-            \fwrite($worksheetFilePointer, $startLine.$rangeLine.$endLine);
+            $mergeCellString.= '</mergeCells>';
+            \fwrite($worksheet->getFilePointer(), $mergeCellString);
         }
-        
+
         \fwrite($worksheetFilePointer, '</worksheet>');
         \fclose($worksheetFilePointer);
     }
