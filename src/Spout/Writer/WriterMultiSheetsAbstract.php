@@ -61,6 +61,30 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
         return $this;
     }
 
+     /**
+     * Set columns widths as list. If value is null will set column with default width (8.43)
+     * @param array $columnWidths
+     * @return WriterMultiSheetsAbstract
+     */
+    public function setColumnWidths(array $columnWidths)
+    {
+        $this->optionsManager->setOption(Options::COLUMN_WIDTHS, $columnWidths);
+        return $this;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param string $range
+     * @return void
+     */
+    public function mergeCells($range)
+    {
+        $this->optionsManager->addOption(Options::MERGE_CELLS, $range);
+        return $this;
+    }
+
+
     /**
      * {@inheritdoc}
      */
