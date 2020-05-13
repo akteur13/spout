@@ -177,12 +177,19 @@ EOD;
         $rowIndexOneBased = $worksheet->getLastWrittenRowIndex() + 1;
         $numCells = $row->getNumCells();
 
-        $rowXML = '<row r="' . $rowIndexOneBased . '" spans="1:' . $numCells . '">';
+        $outlineLevel = $row->getOutlineLevel();
+        $startRowXML = '<row r="' . $rowIndexOneBased . '" spans="1:' . $numCells . '"';
+        $endRowXML = '>';
+        if(!empty($outlineLevel) && $outlineLevel > 0) {
+            $endRowXML = ' outlineLevel="' . $outlineLevel . '">';
+        }
+
+        $rowXML = $startRowXML.$endRowXML;
 
         foreach ($row->getCells() as $columnIndexZeroBased => $cell) {
             $rowXML .= $this->applyStyleAndGetCellXML($cell, $rowStyle, $rowIndexOneBased, $columnIndexZeroBased);
         }
-
+        
         $rowXML .= '</row>';
 
         $wasWriteSuccessful = \fwrite($worksheet->getFilePointer(), $rowXML);
