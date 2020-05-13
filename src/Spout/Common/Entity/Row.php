@@ -18,6 +18,8 @@ class Row
      */
     protected $style;
 
+    protected $level;
+
     /**
      * Row constructor.
      * @param Cell[] $cells
@@ -115,6 +117,16 @@ class Row
         $this->style = $style ?: new Style();
 
         return $this;
+    }
+
+    public function getOutlineLevel() 
+    {
+        return $this->level;
+    }
+
+    public function setOutlineLevel($level)
+    {
+        $this->level = $level;
     }
 
     /**
